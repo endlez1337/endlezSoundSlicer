@@ -46,7 +46,7 @@ class TimeEdit(QSpinBox):
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setMinimumWidth(156)
         self.setAccessibleName(name)
-        self.setToolTip("Zeit eingeben, z. B. 01:23.450. Pfeiltasten ändern die Zeit um eine Sekunde.")
+        self.setToolTip(t("time_edit_tooltip"))
 
     def textFromValue(self, value: int) -> str:
         return format_time(value)
@@ -159,7 +159,7 @@ class EditorWindow(QMainWindow):
         file_info.addWidget(self.filename_label)
         file_info.addWidget(self.metadata_label)
         file_row.addLayout(file_info, 1)
-        self.edited_badge = label("Bearbeitet", "badge")
+        self.edited_badge = label(t("badge_edited"), "badge")
         self.edited_badge.hide()
         file_row.addWidget(self.edited_badge, 0, Qt.AlignmentFlag.AlignVCenter)
         layout.addLayout(file_row)
@@ -172,11 +172,11 @@ class EditorWindow(QMainWindow):
         self.waveform_scrollbar = QScrollBar(Qt.Orientation.Horizontal)
         self.waveform_scrollbar.setRange(0, 0)
         self.waveform_scrollbar.setSingleStep(100)
-        self.waveform_scrollbar.setToolTip("Horizontales Scrollen durch die Waveform bei aktivem Zoom")
+        self.waveform_scrollbar.setToolTip(t("scrollbar_tooltip"))
         self.waveform_scrollbar.setEnabled(False)
         waveform_toolbar.addWidget(self.waveform_scrollbar, 1)
 
-        self.stereo_toggle_button = button("Stereo getrennt", "stereo")
+        self.stereo_toggle_button = button(t("stereo_split"), "stereo")
         self.stereo_toggle_button.setObjectName("small")
         self.stereo_toggle_button.setToolTip("Zwischen getrennter L/R- und kombinierter Waveform umschalten")
         self.stereo_toggle_button.setVisible(False)
@@ -191,19 +191,20 @@ class EditorWindow(QMainWindow):
         self.zoom_in_button = button("+", "zoom_in")
         self.zoom_in_button.setObjectName("small")
         self.zoom_in_button.setToolTip("Hineinzoomen (Strg+Mausrad hoch oder Strg++)")
-        self.zoom_fit_button = button("Ganze Datei", "zoom_fit")
+        self.zoom_fit_button = button(t("zoom_fit"), "zoom_fit")
         self.zoom_fit_button.setObjectName("small")
-        self.zoom_fit_button.setToolTip("Auf die gesamte Datei zurücksetzen (100% / Strg+0)")
+        self.zoom_fit_button.setToolTip(t("zoom_fit_tooltip"))
 
         for widget in (self.zoom_out_button, self.zoom_label, self.zoom_in_button, self.zoom_fit_button):
             waveform_toolbar.addWidget(widget)
         layout.addLayout(waveform_toolbar)
 
-        layout.addWidget(label("Klicken: Abspielen · Ziehen: Bereich · A/B: Grenzen · Strg+Mausrad: Zoomen · Mausrad: Scrollen", "hint"))
+        self.hint_label = label(t("waveform_hint"), "hint")
+        layout.addWidget(self.hint_label)
 
         transport = QHBoxLayout()
         transport.setSpacing(12)
-        self.play_button = button("Abspielen", "play", primary=True)
+        self.play_button = button(t("play"), "play", primary=True)
         self.play_button.setMinimumWidth(138)
         self.play_button.setToolTip("Abspielen / Pause (Leertaste)")
         self.stop_button = button("Stop", "stop")
@@ -230,7 +231,7 @@ class EditorWindow(QMainWindow):
         self.position_slider.setSingleStep(1000)
         self.position_slider.setPageStep(10000)
         self.position_slider.setAccessibleName("Wiedergabeposition")
-        self.position_slider.setToolTip("Wiedergabeposition verschieben")
+        self.position_slider.setToolTip(t("slider_tooltip"))
         layout.addWidget(self.position_slider)
 
         selection_panel = QFrame()
@@ -263,11 +264,11 @@ class EditorWindow(QMainWindow):
         length_column.addWidget(self.selection_length)
         selection_row.addLayout(length_column)
         selection_row.addStretch()
-        self.preview_button = button("Auswahl anhören", "play")
+        self.preview_button = button(t("preview_button"), "play")
         self.preview_button.setToolTip("Nur die Auswahl abspielen, ohne die Datei zu verändern")
-        self.crop_button = button("Zuschneiden", "cut", primary=True)
+        self.crop_button = button(t("crop"), "cut", primary=True)
         self.crop_button.setToolTip("Nur die Auswahl behalten; alles davor und danach entfernen")
-        self.delete_selection_button = button("Bereich herausschneiden", "delete_selection")
+        self.delete_selection_button = button(t("delete_selection"), "delete_selection")
         self.delete_selection_button.setToolTip("Ausgewählten Bereich entfernen und verbleibende Teile nahtlos zusammenfügen (Strg+X)")
         selection_row.addWidget(self.preview_button, 0, Qt.AlignmentFlag.AlignBottom)
         selection_row.addWidget(self.crop_button, 0, Qt.AlignmentFlag.AlignBottom)
@@ -276,18 +277,18 @@ class EditorWindow(QMainWindow):
 
         secondary_row = QHBoxLayout()
         secondary_row.setSpacing(8)
-        self.set_start_button = button("Start = Position")
-        self.set_end_button = button("Ende = Position")
-        self.all_button = button("Alles auswählen")
+        self.set_start_button = button(t("set_start"))
+        self.set_end_button = button(t("set_end"))
+        self.all_button = button(t("select_all"))
         self.fade_in_button = button("Fade In", "fade_in")
         self.fade_in_button.setToolTip("Sanftes Einblenden über die markierte Auswahl")
         self.fade_out_button = button("Fade Out", "fade_out")
         self.fade_out_button.setToolTip("Sanftes Ausblenden über die markierte Auswahl")
         self.normalize_button = button("Normalisieren", "normalize")
         self.normalize_button.setToolTip("Gesamte Datei auf optimalen Spitzenpegel (-0.1 dBFS) aussteuern")
-        self.remove_before_button = button("Alles davor entfernen")
+        self.remove_before_button = button(t("remove_before"))
         self.remove_before_button.setToolTip("Alles vor A entfernen; Audio ab A bis zum Dateiende behalten")
-        self.remove_after_button = button("Alles danach entfernen")
+        self.remove_after_button = button(t("remove_after"))
         self.remove_after_button.setToolTip("Alles nach B entfernen; Audio vom Dateianfang bis B behalten")
         for widget in (self.set_start_button, self.set_end_button, self.all_button,
                        self.fade_in_button, self.fade_out_button, self.normalize_button,
@@ -464,7 +465,15 @@ class EditorWindow(QMainWindow):
             channels_str = t("channel_mono") if clip.channels == 1 else t("channel_stereo")
             self.metadata_label.setText(f"{channels_str} · {clip.sample_rate:,} Hz · {format_time(self.duration_ms)}".replace(",", " "))
 
-        self.volume_label.setText("Lautstärke" if get_language() == "de" else "Volume")
+        self.volume_label.setText(t("volume"))
+        self.edited_badge.setText(t("badge_edited"))
+        if hasattr(self, "hint_label"):
+            self.hint_label.setText(t("waveform_hint"))
+        self.waveform_scrollbar.setToolTip(t("scrollbar_tooltip"))
+        self.position_slider.setToolTip(t("slider_tooltip"))
+        self.start_edit.setToolTip(t("time_edit_tooltip"))
+        self.end_edit.setToolTip(t("time_edit_tooltip"))
+        self.waveform.retranslate_ui()
         self.start_label.setText(t("selection_start"))
         self.end_label.setText(t("selection_end"))
         self.length_label.setText(t("selected_length"))
@@ -528,8 +537,8 @@ class EditorWindow(QMainWindow):
         if self._job is not None:
             return
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Audio-Datei öffnen", "",
-            "Alle unterstützten Audioformate (*.wav *.mp3 *.flac *.ogg *.opus *.m4a *.aac *.aiff *.aif *.wma);;"
+            self, t("file_dialog_open_title"), "",
+            f"{t('file_filter_all')} (*.wav *.mp3 *.flac *.ogg *.opus *.m4a *.aac *.aiff *.aif *.wma);;"
             "WAV Audio (*.wav);;MP3 Audio (*.mp3);;FLAC Audio (*.flac);;OGG Vorbis (*.ogg);;Opus Audio (*.opus);;"
             "M4A Audio (*.m4a);;AAC Audio (*.aac);;AIFF Audio (*.aiff *.aif);;WMA Audio (*.wma)"
         )
@@ -539,7 +548,7 @@ class EditorWindow(QMainWindow):
     def open_path(self, path: Path):
         if self._job is not None or not self._ask_discard():
             return
-        self._begin_job("Audio wird geladen …", lambda: prepare_clip(load_audio(path), self._cache_path), self._loaded)
+        self._begin_job(t("status_loading"), lambda: prepare_clip(load_audio(path), self._cache_path), self._loaded)
 
     def _loaded(self, prepared: PreparedClip):
         self._undo_stack.clear()
@@ -548,7 +557,7 @@ class EditorWindow(QMainWindow):
         self._edited = False
         self._export_path = None
         self._apply_prepared(prepared)
-        self.statusBar().showMessage("Geladen · Bereich in der Waveform ziehen oder Zeiten eingeben")
+        self.statusBar().showMessage(t("status_loaded"))
 
     def _apply_prepared(self, prepared: PreparedClip):
         self.stop()
@@ -600,7 +609,7 @@ class EditorWindow(QMainWindow):
     @Slot(str)
     def _job_failed(self, message: str):
         self.statusBar().showMessage("Verarbeitung fehlgeschlagen · die aktuelle Datei bleibt erhalten")
-        QMessageBox.warning(self, "Audio konnte nicht verarbeitet werden", message)
+        QMessageBox.warning(self, t("error_audio_processing"), message)
 
     @Slot()
     def _job_finished(self):
@@ -764,10 +773,10 @@ class EditorWindow(QMainWindow):
             self._push_undo(previous, old_edited, action_name)
             self._dirty = self._edited = True
             self._apply_prepared(result)
-            self.statusBar().showMessage(f"{action_name} · Ergebnis anhören und bei Bedarf exportieren")
+            self.statusBar().showMessage(t("status_action_done", action=self._localize_action(action_name)))
 
         self._begin_job(
-            f"{action_name} wird ausgeführt …",
+            t("status_action_running", action=self._localize_action(action_name)),
             lambda: prepare_clip(crop_audio(previous.clip, start_ms, end_ms), self._cache_path),
             apply,
         )
@@ -786,10 +795,10 @@ class EditorWindow(QMainWindow):
             self._push_undo(previous, old_edited, "Bereich herausschneiden")
             self._dirty = self._edited = True
             self._apply_prepared(result)
-            self.statusBar().showMessage("Bereich herausgeschnitten · Ergebnis anhören und bei Bedarf exportieren")
+            self.statusBar().showMessage(t("status_deleted"))
 
         self._begin_job(
-            "Bereich wird herausgeschnitten …",
+            t("status_deleting"),
             lambda: prepare_clip(delete_audio_range(previous.clip, start_ms, end_ms), self._cache_path),
             apply,
         )
@@ -843,10 +852,10 @@ class EditorWindow(QMainWindow):
             self._push_undo(previous, old_edited, action_name)
             self._dirty = self._edited = True
             self._apply_prepared(result)
-            self.statusBar().showMessage(f"{action_name} angewendet · Bei Bedarf mit Rückgängig (Strg+Z) zurücknehmen")
+            self.statusBar().showMessage(t("status_fade_done", action=self._localize_action(action_name)))
 
         self._begin_job(
-            f"{action_name} wird berechnet …",
+            t("status_fade_running", action=self._localize_action(action_name)),
             lambda: prepare_clip(apply_fade(previous.clip, start_ms, end_ms, fade_in=fade_in), self._cache_path),
             apply,
         )
@@ -872,7 +881,7 @@ class EditorWindow(QMainWindow):
             prepared = prepare_clip(normalized_clip, self._cache_path)
             return prepared, gain_db
 
-        self._begin_job("Audio wird normalisiert …", worker, apply)
+        self._begin_job(t("status_normalizing_running"), worker, apply)
 
     def export_dialog(self):
         if not self._prepared or self._job is not None:
@@ -883,7 +892,7 @@ class EditorWindow(QMainWindow):
         default_suffix = source.suffix if source.suffix.lower() in SUPPORTED_EXPORT_EXTENSIONS else ".wav"
         suggested = self._export_path or source.with_name(f"{source.stem}_cut{default_suffix}")
         filename, selected_filter = QFileDialog.getSaveFileName(
-            self, "Audio exportieren", str(suggested),
+            self, t("file_dialog_export_title"), str(suggested),
             "WAV Audio (*.wav);;MP3 Audio (*.mp3);;FLAC Audio (*.flac);;OGG Vorbis (*.ogg);;Opus Audio (*.opus);;"
             "M4A Audio (*.m4a);;AAC Audio (*.aac);;AIFF Audio (*.aiff);;WMA Audio (*.wma)",
             options=QFileDialog.Option.DontConfirmOverwrite,
@@ -912,8 +921,8 @@ class EditorWindow(QMainWindow):
                 destination = destination.with_suffix(".wav")
         if destination.suffix.lower() not in SUPPORTED_EXPORT_EXTENSIONS:
             QMessageBox.warning(
-                self, "Ungültiger Dateiname",
-                "Bitte eine unterstützte Dateiendung (.wav, .mp3, .flac, .ogg, .opus, .m4a, .aac, .aiff, .wma) verwenden."
+                self, t("invalid_ext_title"),
+                t("invalid_ext_text")
             )
             return
         if destination.exists():
@@ -926,7 +935,7 @@ class EditorWindow(QMainWindow):
             if box.exec() != QMessageBox.StandardButton.Yes:
                 return
         clip = self._prepared.clip
-        self._begin_job("Audio wird exportiert …", lambda: export_audio(clip, destination), self._exported)
+        self._begin_job(t("status_exporting"), lambda: export_audio(clip, destination), self._exported)
 
     def _exported(self, destination: Path):
         self._dirty = False
@@ -967,7 +976,7 @@ class EditorWindow(QMainWindow):
     def closeEvent(self, event):
         if self._job is not None:
             self._close_requested = True
-            self.statusBar().showMessage("Die laufende Verarbeitung wird beendet; danach schließt das Fenster.")
+            self.statusBar().showMessage(t("status_closing"))
             event.ignore()
             return
         if not self._ask_discard():

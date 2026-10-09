@@ -6,6 +6,7 @@ from PySide6.QtGui import QColor, QFont, QMouseEvent, QPainter, QPainterPath, QP
 from PySide6.QtWidgets import QWidget
 
 from .audio import AudioClip, channel_waveform_peaks, format_time, waveform_peaks
+from .i18n import t
 
 
 class WaveformWidget(QWidget):
@@ -20,7 +21,7 @@ class WaveformWidget(QWidget):
         self.setMinimumSize(400, 200)
         self.setMouseTracking(True)
         self.setAccessibleName("Waveform und Bereichsauswahl")
-        self.setToolTip("Klicken: Abspielen · Ziehen: Bereich · Strg+Mausrad: Zoomen · Mausrad: Scrollen")
+        self._update_tooltip()
 
         self.duration_ms = 0
         self.start_ms = 0
@@ -46,11 +47,22 @@ class WaveformWidget(QWidget):
         self._pan_start_x = 0.0
         self._pan_start_view = 0
 
+
+    def retranslate_ui(self):
+        self._update_tooltip()
+        self.update()
+
+    def _update_tooltip(self):
+        if not getattr(self, "duration_ms", 0):
+            self.setToolTip(t("waveform_empty_tooltip"))
+        else:
+            self.setToolTip(t("waveform_tooltip"))
+
     def graph_rect(self) -> QRectF:
         return QRectF(28, 46, self.width() - 56, self.height() - 90)
 
     def visible_duration_ms(self) -> int:
-        if not self.duration_ms:
+        if not getattr(self, "duration_ms", 0):
             return 0
         return max(50, round(self.duration_ms / self.zoom_level))
 
@@ -100,7 +112,7 @@ class WaveformWidget(QWidget):
         self.update()
 
     def set_zoom(self, zoom_level: float, center_time_ms: int | None = None):
-        if not self.duration_ms:
+        if not getattr(self, "duration_ms", 0):
             return
         zoom_level = max(1.0, min(100.0, float(zoom_level)))
         if center_time_ms is None:
@@ -251,7 +263,7 @@ class WaveformWidget(QWidget):
         painter.drawRoundedRect(QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5), 16, 16)
 
         graph = self.graph_rect()
-        if not self.duration_ms:
+        if not getattr(self, "duration_ms", 0):
             center = self.rect().center()
             painter.setPen(QPen(QColor("#567e79"), 5, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
             for offset, height in [(-32, 16), (-16, 32), (0, 50), (16, 28), (32, 12)]:
@@ -259,11 +271,11 @@ class WaveformWidget(QWidget):
                                  center.x() + offset, center.y() - 56 + height // 2)
             painter.setPen(QColor("#e8edf3"))
             painter.setFont(QFont("Segoe UI", 17, QFont.Weight.DemiBold))
-            painter.drawText(QRectF(0, center.y() - 4, self.width(), 32), Qt.AlignmentFlag.AlignCenter, "Audio-Datei öffnen")
+            painter.drawText(QRectF(0, center.y() - 4, self.width(), 32), Qt.AlignmentFlag.AlignCenter, t("waveform_open_prompt"))
             painter.setPen(QColor("#8996a7"))
             painter.setFont(QFont("Segoe UI", 10))
             painter.drawText(QRectF(0, center.y() + 34, self.width(), 26), Qt.AlignmentFlag.AlignCenter,
-                             "WAV, MP3, FLAC, OGG, Opus, M4A, AAC, AIFF · hier ablegen oder oben öffnen")
+                             t("waveform_open_subtext"))
             painter.end()
             return
 
@@ -355,7 +367,7 @@ class WaveformWidget(QWidget):
         return None
 
     def mousePressEvent(self, event: QMouseEvent):
-        if not self.duration_ms:
+        if not getattr(self, "duration_ms", 0):
             if event.button() == Qt.MouseButton.LeftButton:
                 self.openRequested.emit()
             return
@@ -376,7 +388,7 @@ class WaveformWidget(QWidget):
 
     def mouseMoveEvent(self, event: QMouseEvent):
         x = event.position().x()
-        if not self.duration_ms:
+        if not getattr(self, "duration_ms", 0):
             self.setCursor(Qt.CursorShape.PointingHandCursor)
             return
         if getattr(self, "_panning", False):
@@ -417,7 +429,7 @@ class WaveformWidget(QWidget):
             self.update()
 
     def wheelEvent(self, event: QWheelEvent):
-        if not self.duration_ms:
+        if not getattr(self, "duration_ms", 0):
             return
         delta = event.angleDelta().y() or event.angleDelta().x()
         if not delta:

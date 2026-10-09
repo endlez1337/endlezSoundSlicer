@@ -478,6 +478,9 @@ class EditorTests(unittest.TestCase):
         self.assertEqual(self.window.start_label.text(), "A · Selection Start")
         self.assertEqual(self.window.end_label.text(), "B · Selection End")
         self.assertEqual(self.window.length_label.text(), "Selected Length")
+        self.assertIn("Open audio file", self.window.open_button.toolTip())
+        self.assertIn("Click", self.window.waveform.toolTip())
+        self.assertEqual(self.window.edited_badge.text(), "Edited")
 
         # English HelpDialog
         en_dialog = HelpDialog(self.window, lang="en")
