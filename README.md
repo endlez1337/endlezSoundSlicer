@@ -32,7 +32,7 @@ A fast, lightweight, and modern desktop audio editor for Windows built with Pyth
 
 ```powershell
 # Clone the repository
-git clone https://github.com/endlez/endlezSoundSlicer.git
+git clone https://github.com/endlez1337/endlezSoundSlicer.git
 cd endlezSoundSlicer
 
 # Create virtual environment and install dependencies
